@@ -10,7 +10,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
 
 
-export const maxDuration = 300
+
 
 export async function POST(
   request: Request,
@@ -143,8 +143,11 @@ export async function POST(
       });
     }
 
+   
+
     return new StreamingTextResponse(s);
   } catch (error) {
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
+export const maxDuration = 300
