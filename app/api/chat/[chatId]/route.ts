@@ -147,3 +147,5 @@ export async function POST(
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
+
+export const maxDuration = 10
