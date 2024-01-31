@@ -1,15 +1,12 @@
-
 import { StreamingTextResponse, LangChainStream } from "ai";
 import { auth, currentUser } from "@clerk/nextjs";
-import { Replicate } from "langchain/llms/replicate";
+import { ChatOpenAI } from "langchain/chat_models/openai";
 import { CallbackManager } from "langchain/callbacks";
 import { NextResponse } from "next/server";
 
 import { MemoryManager } from "@/lib/memory";
 import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
-
-
 
 export async function POST(
   request: Request,
@@ -32,7 +29,7 @@ export async function POST(
 
     const companion = await prismadb.companion.update({
       where: {
-        id: params.chatId
+        id: params.chatId,
       },
       data: {
         messages: {
@@ -42,7 +39,7 @@ export async function POST(
             userId: user.id,
           },
         },
-      }
+      },
     });
 
     if (!companion) {
@@ -55,23 +52,26 @@ export async function POST(
     const companionKey = {
       companionName: name!,
       userId: user.id,
-      modelName: "llama2-13b",
+      modelName: "gpt3_5",
     };
     const memoryManager = await MemoryManager.getInstance();
 
     const records = await memoryManager.readLatestHistory(companionKey);
     if (records.length === 0) {
-      await memoryManager.seedChatHistory(companion.seed, "\n\n", companionKey);
+      await memoryManager.seedChatHistory(
+        companion.seed,
+        "\n\n",
+        companionKey
+      );
     }
-    await memoryManager.writeToHistory("User: " + prompt + "\n", companionKey);
+    await memoryManager.writeToHistory(
+      "User: " + prompt + "\n",
+      companionKey
+    );
 
-    // Query Pinecone
-
-    const recentChatHistory = await memoryManager.readLatestHistory(companionKey);
-
-    // Right now the preamble is included in the similarity search, but that
-    // shouldn't be an issue
-
+    const recentChatHistory = await memoryManager.readLatestHistory(
+      companionKey
+    );
     const similarDocs = await memoryManager.vectorSearch(
       recentChatHistory,
       companion_file_name
@@ -79,73 +79,68 @@ export async function POST(
 
     let relevantHistory = "";
     if (!!similarDocs && similarDocs.length !== 0) {
-      relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
+      relevantHistory = similarDocs
+        .map((doc) => doc.pageContent)
+        .join("\n");
     }
+
     const { handlers } = LangChainStream();
-    // Call Replicate for inference
-    const model = new Replicate({
-      model:
-        "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
-      input: {
-        max_length: 2048,
-      },
-      apiKey: process.env.REPLICATE_API_TOKEN,
-      callbackManager: CallbackManager.fromHandlers(handlers),
+    const model = new ChatOpenAI({
+      modelName: "gpt-3.5-turbo-1106",
+      temperature: 0.9,
+      openAIApiKey: process.env.OPENAI_API_KEY,
+      maxTokens: 100,
     });
 
-    // Turn verbose on for debugging
     model.verbose = true;
+    const responseObj = await model
+  .invoke(
+    `
+    ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
 
-    const resp = String(
-      await model
-        .invoke(
-          `
-        ONLY generate plain sentences without prefix of who is speaking. DO NOT use ${companion.name}: prefix. 
+    ${companion.instructions}
 
-        ${companion.instructions}
+    Below are relevant details about ${companion.name}'s past and the conversation you are in.
+    ${relevantHistory}
 
-        Below are relevant details about ${companion.name}'s past and the conversation you are in.
-        ${relevantHistory}
+    ${recentChatHistory}\n${companion.name}:`
+  )
+  .catch(console.error);
 
+  const responseContent = responseObj?.content || "";
 
-        ${recentChatHistory}\n${companion.name}:`
-        )
-        .catch(console.error)
-    );
-
-    const cleaned = resp.replaceAll(",", "");
-    const chunks = cleaned.split("\n");
-    const response = chunks[0];
-
-    await memoryManager.writeToHistory("" + response.trim(), companionKey);
-    var Readable = require("stream").Readable;
-
-    let s = new Readable();
-    s.push(response);
-    s.push(null);
-    if (response !== undefined && response.length > 1) {
-      memoryManager.writeToHistory("" + response.trim(), companionKey);
-
-      await prismadb.companion.update({
-        where: {
-          id: params.chatId
-        },
-        data: {
-          messages: {
-            create: {
-              content: response.trim(),
-              role: "system",
-              userId: user.id,
-            },
+  // Use replace method with regular expression to replace all commas
+  const cleaned = responseContent.toString()
+  const chunks = cleaned.split("\n");
+  const trimmedResponse = chunks[0].trim();
+  
+  await memoryManager.writeToHistory( trimmedResponse, companionKey);
+  
+  var Readable = require("stream").Readable;
+  let s = new Readable();
+  s.push(trimmedResponse);
+  s.push(null);
+  
+  if (trimmedResponse !== undefined && trimmedResponse.length > 1) {
+    await prismadb.companion.update({
+      where: {
+        id: params.chatId,
+      },
+      data: {
+        messages: {
+          create: {
+            content: trimmedResponse,
+            role: "system",
+            userId: user.id,
           },
-        }
-      });
-    }
-
+        },
+      },
+    });
+  }
     return new StreamingTextResponse(s);
   } catch (error) {
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
 
-export const maxDuration = 10
+export const maxDuration = 10;
