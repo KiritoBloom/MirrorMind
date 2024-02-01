@@ -11,9 +11,9 @@ const SettingsPage = async () => {
       <div className="text-muted-foreground text-sm">
         {isPro ? (
           <div className="flex items-center justify-center">
-            <div className="h-[500px] w-[350px] md:w-[400px] lg:w-[400px]  border-primary/40 rounded-sm border-2 shadow-md">
+            <div className="h-[500px] w-[350px] md:w-[400px] lg:w-[400px]  border-primary/40 rounded-md border-2 shadow-md">
               <div className="text-[30px] flex items-center justify-center mt-5 text-primary font-bold">
-                <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 h-[35px] flex items-center justify-center rounded-md p-2">
+                <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 h-[30px] flex items-center justify-center rounded-md p-2">
                   Pro Plan
                 </div>
               </div>
