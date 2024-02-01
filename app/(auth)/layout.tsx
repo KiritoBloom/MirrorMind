@@ -8,7 +8,8 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const targetElement = document.getElementById("autoTypeText");
 
     if (targetElement) {
-      const textToType = "Sign Up or Sign In to start your journey with:";
+      const textToType =
+        "Your Digital Beacon of Wisdom, Guiding You Through the Vast Horizons of Knowledge and Insight with:";
       const typingSpeed = 50; // Adjust the typing speed as needed
 
       autoType(targetElement, textToType, typingSpeed);
@@ -35,10 +36,10 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         <Image width="120" height="120" src="/Icon.png" alt="Logo" />
         <p
           id="autoTypeText"
-          className="text-white text-[30px] font-bold lg:flex lg:items-center lg:justify-center md:items-center md:justify-center mt-[150px] ml-2"
+          className="text-white text-[25px] font-bold lg:flex lg:items-center lg:justify-center md:items-center md:justify-center mt-[95px] ml-2"
         ></p>
         <h1 className="text-[60px] font-bold underline flex items-center justify-center lg:mt-[260px] mt-[150px]">
-          MirroMind
+          MirrorMind
         </h1>
       </div>
       <div className="flex justify-center items-center w-full lg:w-[50%] p-8">
