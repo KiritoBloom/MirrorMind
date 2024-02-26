@@ -18,7 +18,7 @@ To start exploring the possibilities with MirrorMind, follow these steps:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/KiritoBloom/MirrorMind
+   git clone https://github.com/KiritoBloom/MirrorMind.git
    ```
 
 2. **Install Dependencies:**
