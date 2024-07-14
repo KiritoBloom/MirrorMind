@@ -12,6 +12,14 @@ MirrorMind is an innovative AI chatbot platform that empowers users to create pe
 
 - **Clerk Authentication:** To enhance security, Clerk authentication is implemented, safeguarding user data and ensuring a secure authentication process.
 
+## Tech Stack
+
+- **Next.js**
+- **TypeScript**
+- **PineCone**
+- **Upstash**
+- **ChatGPT API**
+
 ## Getting Started
 
 To start exploring the possibilities with MirrorMind, follow these steps:
