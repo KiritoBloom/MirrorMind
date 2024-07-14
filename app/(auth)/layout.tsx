@@ -1,50 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect } from "react";
+import React from "react";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    const targetElement = document.getElementById("autoTypeText");
-
-    if (targetElement) {
-      const textToType =
-        "Your Digital Beacon of Wisdom, Guiding You Through the Vast Horizons of Knowledge and Insight with:";
-      const typingSpeed = 50; // Adjust the typing speed as needed
-
-      autoType(targetElement, textToType, typingSpeed);
-    }
-  }, []);
-
-  function autoType(element: HTMLElement, text: string, speed: number) {
-    let index = 0;
-
-    function type() {
-      if (index < text.length) {
-        element.textContent = text.substring(0, index + 1); // Clear and update content
-        index++;
-        setTimeout(type, speed);
-      }
-    }
-
-    type();
-  }
-
   return (
-    <div className="flex flex-col lg:h-full lg:flex-row">
-      <div className="bg-gradient-to-r from-blue-500 to-purple-500 w-full lg:w-[50%] h-[700px] lg:h-full">
-        <Image width="120" height="120" src="/Icon.png" alt="Logo" />
-        <p
-          id="autoTypeText"
-          className="text-white text-[25px] font-bold lg:flex lg:items-center lg:justify-center md:items-center md:justify-center mt-[95px] ml-2"
-        ></p>
-        <h1 className="text-[60px] font-bold underline flex items-center justify-center lg:mt-[260px] mt-[150px]">
-          MirrorMind
-        </h1>
-      </div>
-      <div className="flex justify-center items-center w-full lg:w-[50%] p-8">
-        {children}
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Header */}
+      <header className="bg-black text-white p-4 flex justify-between items-center shadow-lg rounded-b-lg">
+        <div className="flex items-center">
+          <Image
+            width={50}
+            height={50}
+            src="/Icon.png"
+            alt="Logo"
+            className="mr-2 rounded-full"
+          />
+          <span className="text-2xl font-bold">MirrorMind</span>
+        </div>
+      </header>
+
+      {/* Main Section */}
+      <main className="flex flex-1 flex-col lg:flex-row p-4 lg:p-8">
+        <section className="flex-1 bg-gradient-to-br from-gray-700 to-black text-white p-8 lg:p-16 rounded-lg shadow-lg flex flex-col justify-center items-start mb-4 lg:mb-0 lg:mr-4">
+          <h1 className="text-5xl font-bold mb-4">Welcome to MirrorMind</h1>
+          <p className="text-xl mb-8">
+            Join MirrorMind today! Sign up or log in to get started.
+          </p>
+        </section>
+        <section className="flex-1 bg-white p-8 lg:p-16 rounded-lg shadow-lg flex justify-center items-center">
+          {children}
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-black text-white p-4 text-center rounded-t-lg shadow-lg">
+        <p>&copy; 2024 MirrorMind. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
